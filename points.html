@@ -2,176 +2,163 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Points Table</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tournament Points Table</title>
   <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
     table {
+      width: 80%;
+      margin: 20px auto;
       border-collapse: collapse;
-      width: 60%;
-      margin-bottom: 30px;
+      background: white;
+      box-shadow: 0px 3px 8px rgba(0,0,0,0.2);
     }
     th, td {
-      border: 1px solid #444;
-      padding: 8px;
+      padding: 12px;
+      border: 1px solid #ccc;
       text-align: center;
     }
     th {
-      background: #222;
+      background: #007bff;
       color: white;
     }
-    td[contenteditable="true"] {
+    tr:nth-child(even) {
       background: #f9f9f9;
     }
-    h1 {
-      margin-top: 30px;
+    button {
+      padding: 6px 12px;
+      margin: 3px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .add-btn { background: #28a745; color: white; }
+    .sub-btn { background: #dc3545; color: white; }
+    #sortBtn {
+      background: #007bff;
+      color: white;
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
-  <h1>Group A Table</h1>
-  <table id="groupA">
-    <tr>
-      <th>Team</th>
-      <th>Played</th>
-      <th>Won</th>
-      <th>Lost</th>
-      <th>GD</th>
-      <th>Points</th>
-    </tr>
-    <tr>
-      <td>RAM</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <td>ARAVIND</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <td>KIRAN</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <td>THARUN</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td>0</td>
-    </tr>
-     <tr>
-      <td>UNNI</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td>0</td>
-    </tr>
+  <h1>⚽ Tournament Points Table</h1>
+  <table id="pointsTable">
+    <thead>
+      <tr>
+        <th>Team</th>
+        <th>Points</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <!-- Filled from Firebase -->
+    </tbody>
   </table>
 
-  <h1>Group B Table</h1>
-   <table id="groupB">
-    <tr>
-      <th>Team</th>
-      <th>Played</th>
-      <th>Won</th>
-      <th>Lost</th>
-      <th>GD</th>
-      <th>Points</th>
-    </tr>
-    <tr>
-      <td>AMAL</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <td>DEVARAG</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <td>SAJAN</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <td>AKASH</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <td>ARAVIND</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td contenteditable="true">0</td>
-      <td>0</td>
-    </tr>
-  </table>
+  <button id="sortBtn">Auto Sort by Points</button>
 
-  <script>
-    function updatePointsAndSort(tableId) {
-      let table = document.getElementById(tableId);
-      let rows = Array.from(table.rows).slice(1); // skip header row
+  <!-- Firebase Scripts -->
+  <script type="module">
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, setDoc, updateDoc, getDoc, onSnapshot } 
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-      // update points
-      rows.forEach(row => {
-        let wins = parseInt(row.cells[2].innerText) || 0;
-        row.cells[5].innerText = wins * 3; // 3 points per win
+    // ✅ Your Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyB-17Br-JAG6xfiLM9-rFCMVgaK0qMyeuA",
+      authDomain: "tournament-points-169e2.firebaseapp.com",
+      projectId: "tournament-points-169e2",
+      storageBucket: "tournament-points-169e2.appspot.com",
+      messagingSenderId: "347196129238",
+      appId: "1:347196129238:web:7fc4d20e5206a882fd6e77",
+      measurementId: "G-NM5WY5YMM7"
+    };
+
+    // Init Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 🏆 Teams list (edit as you want)
+    const teams = ["Kiran 💥", "Abhinav", "Amal", "Aravind", "Sajan", "Thab", "Tharun", "Devarag", "Akash", "Unni"];
+
+    // Function to render table
+    async function renderTable() {
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+
+      teams.forEach(async team => {
+        const docRef = doc(db, "points", team);
+        const docSnap = await getDoc(docRef);
+        let points = 0;
+        if (docSnap.exists()) {
+          points = docSnap.data().points;
+        } else {
+          await setDoc(docRef, { points: 0 });
+        }
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${team}</td>
+          <td id="pts-${team}">${points}</td>
+          <td>
+            <button class="add-btn" onclick="updatePoints('${team}', 1)">+1</button>
+            <button class="sub-btn" onclick="updatePoints('${team}', -1)">-1</button>
+          </td>
+        `;
+        tbody.appendChild(row);
       });
-
-      // sort
-      rows.sort((a, b) => {
-        let pointsA = parseInt(a.cells[5].innerText) || 0;
-        let pointsB = parseInt(b.cells[5].innerText) || 0;
-
-        let gdA = parseInt(a.cells[4].innerText) || 0;
-        let gdB = parseInt(b.cells[4].innerText) || 0;
-
-        let winA = parseInt(a.cells[2].innerText) || 0;
-        let winB = parseInt(b.cells[2].innerText) || 0;
-
-        if (pointsB !== pointsA) return pointsB - pointsA;
-        if (gdB !== gdA) return gdB - gdA;
-        return winB - winA;
-      });
-
-      // reattach
-      rows.forEach(row => table.appendChild(row));
     }
 
-    // Auto update + sort when any editable cell changes
-    document.querySelectorAll("td[contenteditable='true']").forEach(cell => {
-      cell.addEventListener("input", () => {
-        updatePointsAndSort("groupA");
-        updatePointsAndSort("groupB");
+    // Update points function
+    window.updatePoints = async function(team, val) {
+      const docRef = doc(db, "points", team);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        let newPoints = docSnap.data().points + val;
+        if (newPoints < 0) newPoints = 0;
+        await updateDoc(docRef, { points: newPoints });
+      }
+    }
+
+    // Real-time listener
+    teams.forEach(team => {
+      const docRef = doc(db, "points", team);
+      onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          document.getElementById("pts-" + team).innerText = docSnap.data().points;
+        }
       });
     });
+
+    // Sorting function
+    document.getElementById("sortBtn").addEventListener("click", () => {
+      const rows = Array.from(document.querySelector("#tableBody").rows);
+      rows.sort((a, b) => {
+        const ptsA = parseInt(a.cells[1].innerText);
+        const ptsB = parseInt(b.cells[1].innerText);
+        return ptsB - ptsA;
+      });
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+      rows.forEach(r => tbody.appendChild(r));
+    });
+
+    // Initial render
+    renderTable();
   </script>
 </body>
 </html>
+
 
 
 
