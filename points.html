@@ -2,109 +2,124 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tournament Points Table</title>
   <script type="module">
-    // Import Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    // Firebase SDK imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // Your Firebase config
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyB-17Br-JAG6xfiLM9-rFCMVgaK0qMyeuA",
       authDomain: "tournament-points-169e2.firebaseapp.com",
       projectId: "tournament-points-169e2",
-      storageBucket: "tournament-points-169e2.firebasestorage.app",
+      storageBucket: "tournament-points-169e2.appspot.com",
       messagingSenderId: "347196129238",
       appId: "1:347196129238:web:7fc4d20e5206a882fd6e77",
       measurementId: "G-NM5WY5YMM7"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Render function
-    async function renderTables() {
-      const groups = ["GroupA", "GroupB"];
-      for (const group of groups) {
-        const q = query(collection(db, group), orderBy("points", "desc"), orderBy("gd", "desc"));
-        const snap = await getDocs(q);
+    // Function to render tables
+    function renderTable(groupId, data) {
+      const tbody = document.querySelector(`#${groupId} tbody`);
+      tbody.innerHTML = ""; // clear table
 
-        let tableBody = document.getElementById(group + "-body");
-        tableBody.innerHTML = "";
-
-        snap.forEach(doc => {
-          const data = doc.data();
-          let row = `
-            <tr>
-              <td>${data.name}</td>
-              <td>${data.played}</td>
-              <td>${data.win}</td>
-              <td>${data.draw}</td>
-              <td>${data.loss}</td>
-              <td>${data.gf}</td>
-              <td>${data.ga}</td>
-              <td>${data.gd}</td>
-              <td>${data.points}</td>
-            </tr>`;
-          tableBody.innerHTML += row;
-        });
-      }
+      data.forEach(player => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${player.name}</td>
+          <td>${player.MP}</td>
+          <td>${player.W}</td>
+          <td>${player.D}</td>
+          <td>${player.L}</td>
+          <td>${player.GD}</td>
+          <td>${player.Pts}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
-    window.onload = renderTables;
+    // Fetch and listen to Firestore updates
+    async function loadData() {
+      // Group A
+      const groupACol = collection(db, "GroupA");
+      onSnapshot(groupACol, (snapshot) => {
+        let players = [];
+        snapshot.forEach(doc => players.push(doc.data()));
+        // Sort by points (highest first)
+        players.sort((a, b) => b.Pts - a.Pts || b.GD - a.GD);
+        renderTable("groupA", players);
+      });
+
+      // Group B
+      const groupBCol = collection(db, "GroupB");
+      onSnapshot(groupBCol, (snapshot) => {
+        let players = [];
+        snapshot.forEach(doc => players.push(doc.data()));
+        players.sort((a, b) => b.Pts - a.Pts || b.GD - a.GD);
+        renderTable("groupB", players);
+      });
+    }
+
+    loadData();
   </script>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      padding: 20px;
-    }
-    h2 {
-      text-align: center;
-      margin-top: 20px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 30px;
-      background: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ddd;
-      text-align: center;
-    }
-    th {
-      background: #333;
-      color: #fff;
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+    h2 { text-align: center; margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+    th { background: #007BFF; color: white; }
+    tr:nth-child(even) { background: #f2f2f2; }
+    .container { display: flex; gap: 20px; }
+    .table-box { flex: 1; }
   </style>
 </head>
 <body>
-  <h2>Group A</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th><th>MP</th><th>W</th><th>D</th><th>L</th>
-        <th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
-      </tr>
-    </thead>
-    <tbody id="GroupA-body"></tbody>
-  </table>
-
-  <h2>Group B</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th><th>MP</th><th>W</th><th>D</th><th>L</th>
-        <th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
-      </tr>
-    </thead>
-    <tbody id="GroupB-body"></tbody>
-  </table>
+  <h1 style="text-align:center;">Tournament Points Table</h1>
+  <div class="container">
+    <div class="table-box">
+      <h2>Group A</h2>
+      <table id="groupA">
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>MP</th>
+            <th>W</th>
+            <th>D</th>
+            <th>L</th>
+            <th>GD</th>
+            <th>Pts</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="table-box">
+      <h2>Group B</h2>
+      <table id="groupB">
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>MP</th>
+            <th>W</th>
+            <th>D</th>
+            <th>L</th>
+            <th>GD</th>
+            <th>Pts</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 </body>
 </html>
+
+
 
 
