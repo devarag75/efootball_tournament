@@ -2,163 +2,106 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tournament Points Table</title>
+  <title>Players Groups</title>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f9;
-      padding: 20px;
-      text-align: center;
-    }
-    h1 {
-      color: #333;
-    }
-    table {
-      width: 80%;
-      margin: 20px auto;
-      border-collapse: collapse;
-      background: white;
-      box-shadow: 0px 3px 8px rgba(0,0,0,0.2);
-    }
-    th, td {
-      padding: 12px;
-      border: 1px solid #ccc;
-      text-align: center;
-    }
-    th {
-      background: #007bff;
-      color: white;
-    }
-    tr:nth-child(even) {
-      background: #f9f9f9;
-    }
-    button {
-      padding: 6px 12px;
-      margin: 3px;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    .add-btn { background: #28a745; color: white; }
-    .sub-btn { background: #dc3545; color: white; }
-    #sortBtn {
-      background: #007bff;
-      color: white;
-      margin-top: 15px;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { text-align: center; }
+    table { width: 45%; border-collapse: collapse; margin: 10px; float: left; }
+    th, td { border: 1px solid black; padding: 8px; text-align: center; }
+    th { background: #f4f4f4; }
+    button { margin: 20px; padding: 10px 15px; cursor: pointer; }
   </style>
 </head>
 <body>
-  <h1>⚽ Tournament Points Table</h1>
-  <table id="pointsTable">
-    <thead>
-      <tr>
-        <th>Team</th>
-        <th>Points</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody">
-      <!-- Filled from Firebase -->
-    </tbody>
-  </table>
 
-  <button id="sortBtn">Auto Sort by Points</button>
+  <h2>Player Groups</h2>
+  <button onclick="shuffleAndSave()">Shuffle & Save Groups</button>
+  
+  <div>
+    <table id="groupA">
+      <thead>
+        <tr><th colspan="2">Group A</th></tr>
+        <tr><th>Player</th><th>Points</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-  <!-- Firebase Scripts -->
+    <table id="groupB">
+      <thead>
+        <tr><th colspan="2">Group B</th></tr>
+        <tr><th>Player</th><th>Points</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
   <script type="module">
-    // Import Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, setDoc, updateDoc, getDoc, onSnapshot } 
-      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    // ✅ Your Firebase Config
+    // Your Firebase config (replace with your values!)
     const firebaseConfig = {
-      apiKey: "AIzaSyB-17Br-JAG6xfiLM9-rFCMVgaK0qMyeuA",
-      authDomain: "tournament-points-169e2.firebaseapp.com",
-      projectId: "tournament-points-169e2",
-      storageBucket: "tournament-points-169e2.appspot.com",
-      messagingSenderId: "347196129238",
-      appId: "1:347196129238:web:7fc4d20e5206a882fd6e77",
-      measurementId: "G-NM5WY5YMM7"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
 
-    // Init Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    // 🏆 Teams list (edit as you want)
-    const teams = ["Kiran 💥", "Abhinav", "Amal", "Aravind", "Sajan", "Thab", "Tharun", "Devarag", "Akash", "Unni"];
+    const players = [
+      "Aravind", "Tharun", "Amal", "Devarag", "Abhinav", "Ram Govind",
+      "Akash", "Kiran", "Sajan", "Unni", "Jesfin", "Thab"
+    ];
 
-    // Function to render table
-    async function renderTable() {
-      const tbody = document.getElementById("tableBody");
-      tbody.innerHTML = "";
+    // Shuffle helper
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
 
-      teams.forEach(async team => {
-        const docRef = doc(db, "points", team);
-        const docSnap = await getDoc(docRef);
-        let points = 0;
-        if (docSnap.exists()) {
-          points = docSnap.data().points;
+    // Shuffle players, split into two groups, save to Firestore
+    async function shuffleAndSave() {
+      const shuffled = shuffle([...players]);
+      const mid = Math.ceil(shuffled.length / 2);
+      const groupA = shuffled.slice(0, mid);
+      const groupB = shuffled.slice(mid);
+
+      // Save to Firestore
+      const batch = db.batch();
+      groupA.forEach(name => {
+        const ref = db.collection("players").doc(name);
+        batch.set(ref, { name, group: "A", points: 0 });
+      });
+      groupB.forEach(name => {
+        const ref = db.collection("players").doc(name);
+        batch.set(ref, { name, group: "B", points: 0 });
+      });
+      await batch.commit();
+
+      alert("Groups saved to Firestore ✅");
+    }
+
+    // Live listener: updates tables whenever Firestore changes
+    db.collection("players").orderBy("points", "desc").onSnapshot(snapshot => {
+      const groupA = document.querySelector("#groupA tbody");
+      const groupB = document.querySelector("#groupB tbody");
+      groupA.innerHTML = "";
+      groupB.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const player = doc.data();
+        const row = `<tr><td>${player.name}</td><td>${player.points}</td></tr>`;
+        if (player.group === "A") {
+          groupA.innerHTML += row;
         } else {
-          await setDoc(docRef, { points: 0 });
-        }
-
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${team}</td>
-          <td id="pts-${team}">${points}</td>
-          <td>
-            <button class="add-btn" onclick="updatePoints('${team}', 1)">+1</button>
-            <button class="sub-btn" onclick="updatePoints('${team}', -1)">-1</button>
-          </td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
-
-    // Update points function
-    window.updatePoints = async function(team, val) {
-      const docRef = doc(db, "points", team);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        let newPoints = docSnap.data().points + val;
-        if (newPoints < 0) newPoints = 0;
-        await updateDoc(docRef, { points: newPoints });
-      }
-    }
-
-    // Real-time listener
-    teams.forEach(team => {
-      const docRef = doc(db, "points", team);
-      onSnapshot(docRef, (docSnap) => {
-        if (docSnap.exists()) {
-          document.getElementById("pts-" + team).innerText = docSnap.data().points;
+          groupB.innerHTML += row;
         }
       });
     });
-
-    // Sorting function
-    document.getElementById("sortBtn").addEventListener("click", () => {
-      const rows = Array.from(document.querySelector("#tableBody").rows);
-      rows.sort((a, b) => {
-        const ptsA = parseInt(a.cells[1].innerText);
-        const ptsB = parseInt(b.cells[1].innerText);
-        return ptsB - ptsA;
-      });
-      const tbody = document.getElementById("tableBody");
-      tbody.innerHTML = "";
-      rows.forEach(r => tbody.appendChild(r));
-    });
-
-    // Initial render
-    renderTable();
   </script>
 </body>
 </html>
-
-
 
 
