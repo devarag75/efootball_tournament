@@ -1,125 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tournament Points Table</title>
-  <script type="module">
-    // Firebase SDK imports
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyB-17Br-JAG6xfiLM9-rFCMVgaK0qMyeuA",
-      authDomain: "tournament-points-169e2.firebaseapp.com",
-      projectId: "tournament-points-169e2",
-      storageBucket: "tournament-points-169e2.appspot.com",
-      messagingSenderId: "347196129238",
-      appId: "1:347196129238:web:7fc4d20e5206a882fd6e77",
-      measurementId: "G-NM5WY5YMM7"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // Function to render tables
-    function renderTable(groupId, data) {
-      const tbody = document.querySelector(`#${groupId} tbody`);
-      tbody.innerHTML = ""; // clear table
-
-      data.forEach(player => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${player.name}</td>
-          <td>${player.MP}</td>
-          <td>${player.W}</td>
-          <td>${player.D}</td>
-          <td>${player.L}</td>
-          <td>${player.GD}</td>
-          <td>${player.Pts}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // Fetch and listen to Firestore updates
-    async function loadData() {
-      // Group A
-      const groupACol = collection(db, "GroupA");
-      onSnapshot(groupACol, (snapshot) => {
-        let players = [];
-        snapshot.forEach(doc => players.push(doc.data()));
-        // Sort by points (highest first)
-        players.sort((a, b) => b.Pts - a.Pts || b.GD - a.GD);
-        renderTable("groupA", players);
-      });
-
-      // Group B
-      const groupBCol = collection(db, "GroupB");
-      onSnapshot(groupBCol, (snapshot) => {
-        let players = [];
-        snapshot.forEach(doc => players.push(doc.data()));
-        players.sort((a, b) => b.Pts - a.Pts || b.GD - a.GD);
-        renderTable("groupB", players);
-      });
-    }
-
-    loadData();
-  </script>
+  <title>Point Table</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
-    h2 { text-align: center; margin-top: 20px; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-    th { background: #007BFF; color: white; }
-    tr:nth-child(even) { background: #f2f2f2; }
-    .container { display: flex; gap: 20px; }
-    .table-box { flex: 1; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+    h2 {
+      margin-top: 40px;
+      color: #333;
+    }
+    table {
+      width: 90%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background: #333;
+      color: white;
+    }
   </style>
 </head>
 <body>
-  <h1 style="text-align:center;">Tournament Points Table</h1>
-  <div class="container">
-    <div class="table-box">
-      <h2>Group A</h2>
-      <table id="groupA">
-        <thead>
-          <tr>
-            <th>Player</th>
-            <th>MP</th>
-            <th>W</th>
-            <th>D</th>
-            <th>L</th>
-            <th>GD</th>
-            <th>Pts</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <div class="table-box">
-      <h2>Group B</h2>
-      <table id="groupB">
-        <thead>
-          <tr>
-            <th>Player</th>
-            <th>MP</th>
-            <th>W</th>
-            <th>D</th>
-            <th>L</th>
-            <th>GD</th>
-            <th>Pts</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
+  <h1>Football Tournament – Point Table</h1>
+
+  <h2>Group A</h2>
+  <table id="groupA">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>MP</th>
+        <th>W</th>
+        <th>D</th>
+        <th>L</th>
+        <th>GD</th>
+        <th>Pts</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Group B</h2>
+  <table id="groupB">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>MP</th>
+        <th>W</th>
+        <th>D</th>
+        <th>L</th>
+        <th>GD</th>
+        <th>Pts</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    // 🔹 Replace with your Firebase config
+    const firebaseConfig = {
+      apiKey: "YOUR_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "XXXXXX",
+      appId: "XXXXXX"
+    };
+
+    // 🔹 Init Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Function to load data
+    function loadTable(groupId, groupName) {
+      db.collection("players")
+        .where("group", "==", groupName)
+        .orderBy("Pts", "desc")
+        .onSnapshot(snapshot => {
+          let tableBody = document.querySelector(`#${groupId} tbody`);
+          tableBody.innerHTML = "";
+          snapshot.forEach(doc => {
+            const p = doc.data();
+            let row = `<tr>
+              <td>${p.name}</td>
+              <td>${p.MP}</td>
+              <td>${p.W}</td>
+              <td>${p.D}</td>
+              <td>${p.L}</td>
+              <td>${p.GD}</td>
+              <td>${p.Pts}</td>
+            </tr>`;
+            tableBody.innerHTML += row;
+          });
+        });
+    }
+
+    // Load Group A and B
+    loadTable("groupA", "A");
+    loadTable("groupB", "B");
+  </script>
 </body>
 </html>
-
-
 
 
