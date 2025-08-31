@@ -33,12 +33,12 @@
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${player.name}</td>
-          <td>${player.MP}</td>
-          <td>${player.W}</td>
-          <td>${player.D}</td>
-          <td>${player.L}</td>
-          <td>${player.GD}</td>
-          <td>${player.Pts}</td>
+          <td>${player.mp}</td>
+          <td>${player.wins}</td>
+          <td>${player.draw}</td>
+          <td>${player.losses}</td>
+          <td>${player.gd}</td>
+          <td>${player.Points}</td>
         `;
         tbody.appendChild(tr);
       });
@@ -119,3 +119,4 @@
   </div>
 </body>
 </html>
+
