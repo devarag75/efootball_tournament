@@ -1,0 +1,104 @@
+/* General layout */
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  color: #222;
+  margin-top: 20px;
+}
+
+h3 {
+  margin-top: 40px;
+  color: #0055ff;
+}
+
+/* Navigation Buttons */
+nav {
+  margin: 20px;
+}
+
+nav a {
+  display: inline-block;
+  padding: 12px 24px;
+  margin: 10px;
+  background: #0055ff;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: 0.3s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+nav a:hover {
+  background: #003bb5;
+  transform: translateY(-2px);
+}
+
+
+/* Tables */
+table {
+  margin: 20px auto 40px auto;
+  border-collapse: collapse;
+  width: 70%;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+caption {
+  caption-side: top;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 12px;
+}
+
+th {
+  background: #0055ff;
+  color: #fff;
+}
+
+/* Alternate row shading */
+tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+/* Highlight important matches */
+.highlight {
+  background: #fffae6;
+  font-weight: bold;
+}
+
+/* Results styling */
+.winner {
+  font-weight: bold;
+  color: green;
+}
+
+.draw {
+  color: #555;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  table {
+    width: 95%;
+    font-size: 14px;
+  }
+  nav a {
+    display: block;
+    margin: 10px 0;
+  }
+}
