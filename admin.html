@@ -22,17 +22,13 @@
   <h2>Add Match Result</h2>
 
   <label>Team A</label>
-  <select id="teamA">
-    <option value="">Select Team</option>
-  </select>
+  <select id="teamA"><option value="">Select Team</option></select>
 
   <label>Goals (Team A)</label>
   <input type="number" id="goalsA" min="0" />
 
   <label>Team B</label>
-  <select id="teamB">
-    <option value="">Select Team</option>
-  </select>
+  <select id="teamB"><option value="">Select Team</option></select>
 
   <label>Goals (Team B)</label>
   <input type="number" id="goalsB" min="0" />
@@ -49,144 +45,120 @@
   <p id="msg"></p>
 </section>
 
+<section class="admin-form">
+  <h2>Existing Matches</h2>
+  <div id="matchList"></div>
+</section>
+
 <footer>
   <p>Admin • Arjun Cup © 2026</p>
 </footer>
 
 <script type="module">
   import { auth, db } from "./firebase.js";
-  import { onAuthStateChanged, signOut } 
+  import { onAuthStateChanged, signOut }
     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
   import {
-    collection, addDoc, getDocs, updateDoc, doc, serverTimestamp
+    collection, addDoc, getDocs, updateDoc, deleteDoc,
+    doc, serverTimestamp, query, orderBy
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-  const statusEl = document.getElementById("adminStatus");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const msg = document.getElementById("msg");
 
   const teamASelect = document.getElementById("teamA");
   const teamBSelect = document.getElementById("teamB");
+  const msg = document.getElementById("msg");
+  const matchList = document.getElementById("matchList");
 
-  /* 🔐 AUTH + ADMIN CHECK */
   onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      window.location.href = "login.html";
-      return;
-    }
-
-    statusEl.innerText = `Admin: ${user.email}`;
+    if (!user) location.href = "login.html";
+    document.getElementById("adminStatus").innerText = user.email;
     await loadTeams();
+    await loadMatches();
   });
 
-  /* 🚪 LOGOUT */
-  logoutBtn.onclick = async () => {
+  document.getElementById("logoutBtn").onclick = async () => {
     await signOut(auth);
-    window.location.href = "login.html";
+    location.href = "login.html";
   };
 
-  /* 🌍 LOAD TEAMS FROM FIRESTORE */
   async function loadTeams() {
     teamASelect.innerHTML = '<option value="">Select Team</option>';
     teamBSelect.innerHTML = '<option value="">Select Team</option>';
-
     const snap = await getDocs(collection(db, "teams"));
-
     snap.forEach(d => {
-      const teamId = d.id; // argentina, brazil, etc
-
-      const optA = document.createElement("option");
-      optA.value = teamId;
-      optA.textContent = teamId.toUpperCase();
-      teamASelect.appendChild(optA);
-
-      const optB = document.createElement("option");
-      optB.value = teamId;
-      optB.textContent = teamId.toUpperCase();
-      teamBSelect.appendChild(optB);
+      ["A","B"].forEach(x => {
+        const opt = document.createElement("option");
+        opt.value = d.id;
+        opt.textContent = d.id.toUpperCase();
+        (x==="A"?teamASelect:teamBSelect).appendChild(opt);
+      });
     });
   }
 
-  /* 🔄 RECALCULATE POINTS */
   async function recalcPoints() {
     const teamsSnap = await getDocs(collection(db, "teams"));
     const teams = {};
-
-    teamsSnap.forEach(d => {
-      teams[d.id] = {
-        matches: 0,
-        wins: 0,
-        draws: 0,
-        losses: 0,
-        goalDifference: 0,
-        points: 0
-      };
+    teamsSnap.forEach(d => teams[d.id] = {
+      matches:0,wins:0,draws:0,losses:0,goalDifference:0,points:0
     });
 
     const matchesSnap = await getDocs(collection(db, "matches"));
-
     matchesSnap.forEach(d => {
       const { teamA, teamB, goalsA, goalsB } = d.data();
-
-      teams[teamA].matches++;
-      teams[teamB].matches++;
-
-      teams[teamA].goalDifference += goalsA - goalsB;
-      teams[teamB].goalDifference += goalsB - goalsA;
+      teams[teamA].matches++; teams[teamB].matches++;
+      teams[teamA].goalDifference += goalsA-goalsB;
+      teams[teamB].goalDifference += goalsB-goalsA;
 
       if (goalsA > goalsB) {
-        teams[teamA].wins++;
-        teams[teamA].points += 3;
-        teams[teamB].losses++;
+        teams[teamA].wins++; teams[teamA].points+=3; teams[teamB].losses++;
       } else if (goalsB > goalsA) {
-        teams[teamB].wins++;
-        teams[teamB].points += 3;
-        teams[teamA].losses++;
+        teams[teamB].wins++; teams[teamB].points+=3; teams[teamA].losses++;
       } else {
-        teams[teamA].draws++;
-        teams[teamB].draws++;
-        teams[teamA].points++;
-        teams[teamB].points++;
+        teams[teamA].draws++; teams[teamB].draws++;
+        teams[teamA].points++; teams[teamB].points++;
       }
     });
 
-    for (const t in teams) {
-      await updateDoc(doc(db, "teams", t), teams[t]);
-    }
+    for (const t in teams)
+      await updateDoc(doc(db,"teams",t), teams[t]);
   }
 
-  /* 💾 SAVE MATCH */
   document.getElementById("saveBtn").onclick = async () => {
-    const teamA = teamASelect.value;
-    const teamB = teamBSelect.value;
-    const goalsA = Number(document.getElementById("goalsA").value);
-    const goalsB = Number(document.getElementById("goalsB").value);
-    const round = document.getElementById("round").value;
-
-    if (!teamA || !teamB || teamA === teamB) {
-      msg.innerText = "❌ Select two different teams";
-      return;
-    }
-
-    if (isNaN(goalsA) || isNaN(goalsB)) {
-      msg.innerText = "❌ Enter valid goals";
-      return;
-    }
-
-    await addDoc(collection(db, "matches"), {
-      teamA,
-      teamB,
-      goalsA,
-      goalsB,
-      round,
+    await addDoc(collection(db,"matches"), {
+      teamA: teamASelect.value,
+      teamB: teamBSelect.value,
+      goalsA: Number(goalsA.value),
+      goalsB: Number(goalsB.value),
+      round: round.value,
       createdAt: serverTimestamp()
     });
-
     await recalcPoints();
+    msg.innerText = "✅ Match saved";
+    loadMatches();
+  };
 
-    msg.innerText = "✅ Match saved & points updated";
-    document.getElementById("goalsA").value = "";
-    document.getElementById("goalsB").value = "";
+  async function loadMatches() {
+    matchList.innerHTML = "";
+    const q = query(collection(db,"matches"), orderBy("createdAt","desc"));
+    const snap = await getDocs(q);
+
+    snap.forEach(d => {
+      const m = d.data();
+      const div = document.createElement("div");
+      div.className = "match-card";
+      div.innerHTML = `
+        <b>${m.teamA.toUpperCase()} ${m.goalsA} - ${m.goalsB} ${m.teamB.toUpperCase()}</b>
+        <small>${m.round}</small>
+        <button onclick="deleteMatch('${d.id}')">🗑 Delete</button>
+      `;
+      matchList.appendChild(div);
+    });
+  }
+
+  window.deleteMatch = async (id) => {
+    if (!confirm("Delete this match?")) return;
+    await deleteDoc(doc(db,"matches",id));
+    await recalcPoints();
+    loadMatches();
   };
 </script>
 
