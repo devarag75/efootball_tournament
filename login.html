@@ -1,29 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login – Arjun Cup</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
 <body>
 
-<button id="login">Login with Google</button>
+  <header>
+    <h1>🔐 Admin Login</h1>
+    <p>Arjun Cup Tournament</p>
+  </header>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  <section class="login-box">
+    <button id="loginBtn">Login with Google</button>
+    <p id="loginMsg"></p>
+  </section>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyB-17Br-JAG6xfiLM9-rFCMVgaK0qMyeuA",
-    authDomain: "tournament-points-169e2.firebaseapp.com",
-    projectId: "tournament-points-169e2"
-  };
+  <script type="module">
+    import { auth, db } from "./firebase.js";
+    import { GoogleAuthProvider, signInWithPopup } 
+      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { doc, getDoc } 
+      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
+    const provider = new GoogleAuthProvider();
+    const msg = document.getElementById("loginMsg");
 
-  document.getElementById("login").onclick = async () => {
-    const result = await signInWithPopup(auth, provider);
-    alert("Logged in: " + result.user.email);
-    console.log("UID:", result.user.uid);
-  };
-</script>
+    document.getElementById("loginBtn").onclick = async () => {
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        msg.innerText = "Checking admin access...";
+
+        // 🔐 Check if user is admin
+        const adminRef = doc(db, "admins", user.uid);
+        const adminSnap = await getDoc(adminRef);
+
+        if (adminSnap.exists()) {
+          msg.innerText = "Admin verified. Redirecting...";
+          window.location.href = "admin.html";
+        } else {
+          msg.innerText = "❌ Access denied. You are not an admin.";
+        }
+
+      } catch (error) {
+        console.error(error);
+        msg.innerText = error.message;
+      }
+    };
+  </script>
 
 </body>
 </html>
+
