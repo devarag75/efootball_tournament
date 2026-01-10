@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Arjun Cup – Admin Panel</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <h1>🛠 Admin Panel</h1>
+    <p>Arjun Cup – Match Management</p>
+  </header>
+
+  <!-- ADMIN INFO -->
+  <section class="admin-info">
+    <p id="adminStatus">Checking admin access...</p>
+    <button id="logoutBtn">Logout</button>
+  </section>
+
+  <!-- ADD MATCH FORM -->
+  <section class="admin-form">
+    <h2>Add Match Result</h2>
+
+    <label>Team A</label>
+    <select id="teamA">
+      <option value="">Select Team</option>
+      <option value="india">India</option>
+      <option value="brazil">Brazil</option>
+      <option value="argentina">Argentina</option>
+      <option value="france">France</option>
+      <option value="germany">Germany</option>
+    </select>
+
+    <label>Goals (Team A)</label>
+    <input type="number" id="goalsA" min="0" />
+
+    <label>Team B</label>
+    <select id="teamB">
+      <option value="">Select Team</option>
+      <option value="india">India</option>
+      <option value="brazil">Brazil</option>
+      <option value="argentina">Argentina</option>
+      <option value="france">France</option>
+      <option value="germany">Germany</option>
+    </select>
+
+    <label>Goals (Team B)</label>
+    <input type="number" id="goalsB" min="0" />
+
+    <label>Round</label>
+    <select id="round">
+      <option value="Group Stage">Group Stage</option>
+      <option value="Quarter Final">Quarter Final</option>
+      <option value="Semi Final">Semi Final</option>
+      <option value="Final">Final</option>
+    </select>
+
+    <button id="saveMatchBtn">Save Match</button>
+
+    <p id="formMessage"></p>
+  </section>
+
+  <footer>
+    <p>Admin • Arjun Cup © 2026</p>
+  </footer>
+
+  <!-- Logic will be added next -->
+  <script type="module">
+    console.log("Admin page loaded");
+  </script>
+
+</body>
+</html>
