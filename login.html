@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<button id="login">Login with Google</button>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB-17Br-JAG6xfiLM9-rFCMVgaK0qMyeuA=",
+    authDomain: "tournament-points-169e2.firebaseapp.com",
+    projectId: "tournament-points-169e2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  document.getElementById("login").onclick = async () => {
+    const result = await signInWithPopup(auth, provider);
+    alert("Logged in: " + result.user.email);
+    console.log("UID:", result.user.uid);
+  };
+</script>
+
+</body>
+</html>
