@@ -43,18 +43,19 @@
     b.points - a.points || b.goalDifference - a.goalDifference
   );
 
-  teams.forEach(t => {
-    body.innerHTML += `
-      <tr>
-        <td>${t.country}</td>
-        <td>${t.matches}</td>
-        <td>${t.wins}</td>
-        <td>${t.draws}</td>
-        <td>${t.losses}</td>
-        <td>${t.goalDifference}</td>
-        <td class="points">${t.points}</td>
-      </tr>`;
-  });
+teams.forEach(t => {
+  body.innerHTML += `
+    <tr>
+      <td>${t.id.toUpperCase()}</td>
+      <td>${t.matches || 0}</td>
+      <td>${t.wins || 0}</td>
+      <td>${t.draws || 0}</td>
+      <td>${t.losses || 0}</td>
+      <td>${t.goalDifference || 0}</td>
+      <td class="points">${t.points || 0}</td>
+    </tr>`;
+});
+
 </script>
 
 </body>
