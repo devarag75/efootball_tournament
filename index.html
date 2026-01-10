@@ -4,21 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Arjun Cup – Points Table</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <header>
     <h1>🏆 Arjun Cup</h1>
-    <p>eFootball Tournament – Points Table</p>
+    <p>eFootball Tournament</p>
   </header>
 
+  <!-- POINTS TABLE -->
   <section class="table-container">
-    <table>
+    <h2>Points Table</h2>
+    <table id="pointsTable">
       <thead>
         <tr>
           <th>#</th>
           <th>Team</th>
+          <th>Player</th>
           <th>M</th>
           <th>W</th>
           <th>D</th>
@@ -28,43 +31,27 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>1</td>
-          <td>Arsenal</td>
-          <td>5</td>
-          <td>4</td>
-          <td>1</td>
-          <td>0</td>
-          <td>+8</td>
-          <td class="points">13</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>Barcelona</td>
-          <td>5</td>
-          <td>3</td>
-          <td>1</td>
-          <td>1</td>
-          <td>+4</td>
-          <td class="points">10</td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>Real Madrid</td>
-          <td>5</td>
-          <td>2</td>
-          <td>1</td>
-          <td>2</td>
-          <td>0</td>
-          <td class="points">7</td>
-        </tr>
+        <!-- Filled from Firebase -->
       </tbody>
     </table>
   </section>
 
+  <!-- MATCH RESULTS -->
+  <section class="matches">
+    <h2>Match Results</h2>
+    <div id="matchList">
+      <!-- Matches will load here -->
+    </div>
+  </section>
+
   <footer>
-    <p>Developed by Tech Morsels ⚽</p>
+    <p>Arjun Cup © 2026</p>
   </footer>
+
+  <!-- Firebase logic will be added later -->
+  <script type="module">
+    console.log("Viewer page loaded");
+  </script>
 
 </body>
 </html>
