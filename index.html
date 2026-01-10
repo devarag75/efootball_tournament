@@ -1,20 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Arjun Cup</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
 <header>
-  <h1>Arjun Cup</h1>
+  <h1>🏆 Arjun Cup</h1>
+  <p>eFootball Tournament</p>
 </header>
 
-<div class="table-container">
+<!-- POINTS TABLE -->
+<section class="table-container">
   <table>
     <thead>
       <tr>
+        <th>#</th>
         <th>Team</th>
         <th>M</th>
         <th>W</th>
@@ -26,36 +30,84 @@
     </thead>
     <tbody id="tableBody"></tbody>
   </table>
-</div>
+</section>
+
+<!-- MATCH RESULTS -->
+<section class="matches">
+  <h2>Match Results</h2>
+
+  <div id="Group Stage" class="round">
+    <h3>Group Stage</h3>
+  </div>
+
+  <div id="Quarter Final" class="round">
+    <h3>Quarter Final</h3>
+  </div>
+
+  <div id="Semi Final" class="round">
+    <h3>Semi Final</h3>
+  </div>
+
+  <div id="Final" class="round">
+    <h3>Final</h3>
+  </div>
+</section>
+
+<footer>
+  <p>Arjun Cup © 2026</p>
+</footer>
 
 <script type="module">
   import { db } from "./firebase.js";
-  import { collection, getDocs } from
-    "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import {
+    collection, getDocs, query, orderBy
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  const body = document.getElementById("tableBody");
-  const snap = await getDocs(collection(db, "teams"));
+  /* LOAD POINTS TABLE */
+  const tableBody = document.getElementById("tableBody");
+  const teamsSnap = await getDocs(collection(db, "teams"));
 
-  const teams = [];
-  snap.forEach(d => teams.push({ id: d.id, ...d.data() }));
+  let teams = [];
+  teamsSnap.forEach(d => teams.push({ id: d.id, ...d.data() }));
 
   teams.sort((a, b) =>
     b.points - a.points || b.goalDifference - a.goalDifference
   );
 
-teams.forEach(t => {
-  body.innerHTML += `
-    <tr>
-      <td>${t.id.toUpperCase()}</td>
-      <td>${t.matches || 0}</td>
-      <td>${t.wins || 0}</td>
-      <td>${t.draws || 0}</td>
-      <td>${t.losses || 0}</td>
-      <td>${t.goalDifference || 0}</td>
-      <td class="points">${t.points || 0}</td>
-    </tr>`;
-});
+  teams.forEach((t, i) => {
+    tableBody.innerHTML += `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${t.id.toUpperCase()}</td>
+        <td>${t.matches}</td>
+        <td>${t.wins}</td>
+        <td>${t.draws}</td>
+        <td>${t.losses}</td>
+        <td>${t.goalDifference}</td>
+        <td class="points">${t.points}</td>
+      </tr>
+    `;
+  });
 
+  /* LOAD MATCHES ROUND‑WISE */
+  const rounds = ["Group Stage", "Quarter Final", "Semi Final", "Final"];
+  const matchSnap = await getDocs(
+    query(collection(db, "matches"), orderBy("createdAt", "asc"))
+  );
+
+  matchSnap.forEach(d => {
+    const m = d.data();
+    const roundDiv = document.getElementById(m.round);
+
+    if (!roundDiv) return;
+
+    const card = document.createElement("div");
+    card.className = "match-card";
+    card.innerHTML = `
+      <strong>${m.teamA.toUpperCase()} ${m.goalsA} - ${m.goalsB} ${m.teamB.toUpperCase()}</strong>
+    `;
+    roundDiv.appendChild(card);
+  });
 </script>
 
 </body>
