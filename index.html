@@ -13,7 +13,7 @@
   <p>eFootball Tournament</p>
 </header>
 
-<!-- POINTS TABLE -->
+<!-- ================= POINTS TABLE ================= -->
 <section class="table-container">
   <table>
     <thead>
@@ -32,9 +32,17 @@
   </table>
 </section>
 
-<!-- MATCH RESULTS -->
+<!-- ================= MATCH RESULTS ================= -->
 <section class="matches">
   <h2>Match Results</h2>
+
+  <!-- 🔍 TEAM FILTER -->
+  <div class="filter-box">
+    <label for="teamFilter">Match with a specific Team</label>
+    <select id="teamFilter">
+      <option value="all">All Teams</option>
+    </select>
+  </div>
 
   <div id="Group Stage" class="round">
     <h3>Group Stage</h3>
@@ -57,18 +65,25 @@
   <p>Arjun Cup © 2026</p>
 </footer>
 
+<!-- ================= SCRIPT ================= -->
 <script type="module">
   import { db } from "./firebase.js";
   import {
-    collection, getDocs, query, orderBy
+    collection,
+    getDocs,
+    query,
+    orderBy
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  /* LOAD POINTS TABLE */
+  /* ================= POINTS TABLE ================= */
   const tableBody = document.getElementById("tableBody");
-  const teamsSnap = await getDocs(collection(db, "teams"));
 
+  const teamsSnap = await getDocs(collection(db, "teams"));
   let teams = [];
-  teamsSnap.forEach(d => teams.push({ id: d.id, ...d.data() }));
+
+  teamsSnap.forEach(d => {
+    teams.push({ id: d.id, ...d.data() });
+  });
 
   teams.sort((a, b) =>
     b.points - a.points || b.goalDifference - a.goalDifference
@@ -79,34 +94,75 @@
       <tr>
         <td>${i + 1}</td>
         <td>${t.id.toUpperCase()}</td>
-        <td>${t.matches}</td>
-        <td>${t.wins}</td>
-        <td>${t.draws}</td>
-        <td>${t.losses}</td>
-        <td>${t.goalDifference}</td>
-        <td class="points">${t.points}</td>
+        <td>${t.matches || 0}</td>
+        <td>${t.wins || 0}</td>
+        <td>${t.draws || 0}</td>
+        <td>${t.losses || 0}</td>
+        <td>${t.goalDifference || 0}</td>
+        <td class="points">${t.points || 0}</td>
       </tr>
     `;
   });
 
-  /* LOAD MATCHES ROUND‑WISE */
-  const rounds = ["Group Stage", "Quarter Final", "Semi Final", "Final"];
+  /* ================= MATCH RESULTS + FILTER ================= */
+  const teamFilter = document.getElementById("teamFilter");
+  let allMatches = [];
+
+  // Load teams into filter dropdown
+  teams.forEach(t => {
+    const opt = document.createElement("option");
+    opt.value = t.id;
+    opt.textContent = t.id.toUpperCase();
+    teamFilter.appendChild(opt);
+  });
+
+  // Load matches
   const matchSnap = await getDocs(
     query(collection(db, "matches"), orderBy("createdAt", "asc"))
   );
 
   matchSnap.forEach(d => {
-    const m = d.data();
-    const roundDiv = document.getElementById(m.round);
+    allMatches.push({ id: d.id, ...d.data() });
+  });
 
-    if (!roundDiv) return;
+  function clearMatches() {
+    document.querySelectorAll(".round").forEach(r => {
+      r.querySelectorAll(".match-card").forEach(c => c.remove());
+    });
+  }
 
-    const card = document.createElement("div");
-    card.className = "match-card";
-    card.innerHTML = `
-      <strong>${m.teamA.toUpperCase()} ${m.goalsA} - ${m.goalsB} ${m.teamB.toUpperCase()}</strong>
-    `;
-    roundDiv.appendChild(card);
+  function renderMatches(filterTeam = "all") {
+    clearMatches();
+
+    allMatches.forEach(m => {
+      if (
+        filterTeam !== "all" &&
+        m.teamA !== filterTeam &&
+        m.teamB !== filterTeam
+      ) return;
+
+      const roundDiv = document.getElementById(m.round);
+      if (!roundDiv) return;
+
+      const card = document.createElement("div");
+      card.className = "match-card";
+      card.innerHTML = `
+        <strong>
+          ${m.teamA.toUpperCase()} ${m.goalsA}
+          -
+          ${m.goalsB} ${m.teamB.toUpperCase()}
+        </strong>
+      `;
+      roundDiv.appendChild(card);
+    });
+  }
+
+  // Initial render
+  renderMatches();
+
+  // On filter change
+  teamFilter.addEventListener("change", e => {
+    renderMatches(e.target.value);
   });
 </script>
 
