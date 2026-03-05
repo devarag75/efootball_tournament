@@ -1,170 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <title>Arjun Cup</title>
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
+  <title>TournamentOS — Tournament Management Platform</title>
+  <meta name="description"
+    content="Scalable football and eFootball tournament management platform. Create tournaments, manage teams, track standings, and share results." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
 </head>
+
 <body>
-
-<header>
-  <h1>🏆 Arjun Cup</h1>
-  <p>eFootball Tournament</p>
-</header>
-
-<!-- ================= POINTS TABLE ================= -->
-<section class="table-container">
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Team</th>
-        <th>M</th>
-        <th>W</th>
-        <th>D</th>
-        <th>L</th>
-        <th>GD</th>
-        <th>Pts</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
-</section>
-
-<!-- ================= MATCH RESULTS ================= -->
-<section class="matches">
-  <h2>Match Results</h2>
-
-  <!-- 🔍 TEAM FILTER -->
-  <div class="filter-box">
-    <label for="teamFilter">Match with a specific Team</label>
-    <select id="teamFilter">
-      <option value="all">All Teams</option>
-    </select>
-  </div>
-
-  <div id="Group Stage" class="round">
-    <h3>Group Stage</h3>
-  </div>
-
-  <div id="Quarter Final" class="round">
-    <h3>Quarter Final</h3>
-  </div>
-
-  <div id="Semi Final" class="round">
-    <h3>Semi Final</h3>
-  </div>
-
-  <div id="Final" class="round">
-    <h3>Final</h3>
-  </div>
-</section>
-
-<footer>
-  <p>Arjun Cup © 2026</p>
-</footer>
-
-<!-- ================= SCRIPT ================= -->
-<script type="module">
-  import { db } from "./firebase.js";
-  import {
-    collection,
-    getDocs,
-    query,
-    orderBy
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-  /* ================= POINTS TABLE ================= */
-  const tableBody = document.getElementById("tableBody");
-
-  const teamsSnap = await getDocs(collection(db, "teams"));
-  let teams = [];
-
-  teamsSnap.forEach(d => {
-    teams.push({ id: d.id, ...d.data() });
-  });
-
-  teams.sort((a, b) =>
-    b.points - a.points || b.goalDifference - a.goalDifference
-  );
-
-  teams.forEach((t, i) => {
-    tableBody.innerHTML += `
-      <tr>
-        <td>${i + 1}</td>
-        <td>${t.id.toUpperCase()}</td>
-        <td>${t.matches || 0}</td>
-        <td>${t.wins || 0}</td>
-        <td>${t.draws || 0}</td>
-        <td>${t.losses || 0}</td>
-        <td>${t.goalDifference || 0}</td>
-        <td class="points">${t.points || 0}</td>
-      </tr>
-    `;
-  });
-
-  /* ================= MATCH RESULTS + FILTER ================= */
-  const teamFilter = document.getElementById("teamFilter");
-  let allMatches = [];
-
-  // Load teams into filter dropdown
-  teams.forEach(t => {
-    const opt = document.createElement("option");
-    opt.value = t.id;
-    opt.textContent = t.id.toUpperCase();
-    teamFilter.appendChild(opt);
-  });
-
-  // Load matches
-  const matchSnap = await getDocs(
-    query(collection(db, "matches"), orderBy("createdAt", "asc"))
-  );
-
-  matchSnap.forEach(d => {
-    allMatches.push({ id: d.id, ...d.data() });
-  });
-
-  function clearMatches() {
-    document.querySelectorAll(".round").forEach(r => {
-      r.querySelectorAll(".match-card").forEach(c => c.remove());
-    });
-  }
-
-  function renderMatches(filterTeam = "all") {
-    clearMatches();
-
-    allMatches.forEach(m => {
-      if (
-        filterTeam !== "all" &&
-        m.teamA !== filterTeam &&
-        m.teamB !== filterTeam
-      ) return;
-
-      const roundDiv = document.getElementById(m.round);
-      if (!roundDiv) return;
-
-      const card = document.createElement("div");
-      card.className = "match-card";
-      card.innerHTML = `
-        <strong>
-          ${m.teamA.toUpperCase()} ${m.goalsA}
-          -
-          ${m.goalsB} ${m.teamB.toUpperCase()}
-        </strong>
-      `;
-      roundDiv.appendChild(card);
-    });
-  }
-
-  // Initial render
-  renderMatches();
-
-  // On filter change
-  teamFilter.addEventListener("change", e => {
-    renderMatches(e.target.value);
-  });
-</script>
-
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
+
 </html>

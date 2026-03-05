@@ -1,0 +1,215 @@
+@import "tailwindcss";
+
+/* ===== Custom Design Tokens ===== */
+@theme {
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --color-dark-900: #0a0e1a;
+    --color-dark-800: #0f1629;
+    --color-dark-700: #151d36;
+    --color-dark-600: #1e293b;
+    --color-dark-500: #2a3654;
+    --color-dark-400: #334155;
+    --color-accent-400: #38bdf8;
+    --color-accent-500: #0ea5e9;
+    --color-accent-600: #0284c7;
+    --color-emerald-400: #34d399;
+    --color-emerald-500: #10b981;
+    --color-amber-400: #fbbf24;
+    --color-red-400: #f87171;
+    --color-red-500: #ef4444;
+}
+
+/* ===== Base Styles ===== */
+body {
+    font-family: var(--font-sans);
+    background-color: var(--color-dark-900);
+    color: #e2e8f0;
+    overflow-x: hidden;
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-dark-800);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-dark-500);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-dark-400);
+}
+
+/* ===== Glass Card ===== */
+.glass-card {
+    background: linear-gradient(135deg, rgba(15, 22, 41, 0.8), rgba(21, 29, 54, 0.6));
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(56, 189, 248, 0.08);
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+    border-color: rgba(56, 189, 248, 0.2);
+    box-shadow: 0 8px 32px rgba(56, 189, 248, 0.06);
+}
+
+/* ===== Glow Effects ===== */
+.glow-accent {
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.15), 0 0 60px rgba(56, 189, 248, 0.05);
+}
+
+.glow-emerald {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+/* ===== Animations ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
+    }
+
+    50% {
+        box-shadow: 0 0 40px rgba(56, 189, 248, 0.25);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.5s ease-out both;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out both;
+}
+
+.animate-slide-in {
+    animation: slideInLeft 0.4s ease-out both;
+}
+
+/* Staggered animation delays */
+.delay-1 {
+    animation-delay: 0.05s;
+}
+
+.delay-2 {
+    animation-delay: 0.1s;
+}
+
+.delay-3 {
+    animation-delay: 0.15s;
+}
+
+.delay-4 {
+    animation-delay: 0.2s;
+}
+
+.delay-5 {
+    animation-delay: 0.25s;
+}
+
+.delay-6 {
+    animation-delay: 0.3s;
+}
+
+/* ===== Gradient Text ===== */
+.gradient-text {
+    background: linear-gradient(135deg, #38bdf8, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ===== Bracket Connector Lines ===== */
+.bracket-connector {
+    position: relative;
+}
+
+.bracket-connector::after {
+    content: '';
+    position: absolute;
+    right: -24px;
+    top: 50%;
+    width: 24px;
+    height: 2px;
+    background: var(--color-dark-500);
+}
+
+/* ===== Table Styles ===== */
+.standings-table th {
+    background: var(--color-dark-700);
+    padding: 12px 16px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-accent-400);
+    white-space: nowrap;
+}
+
+.standings-table td {
+    padding: 12px 16px;
+    text-align: center;
+    border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.standings-table tbody tr {
+    transition: background 0.2s;
+}
+
+.standings-table tbody tr:hover {
+    background: rgba(56, 189, 248, 0.04);
+}
+
+/* ===== Toast ===== */
+.toast-enter {
+    animation: fadeInUp 0.3s ease-out both;
+}
+
+.toast-exit {
+    animation: fadeIn 0.3s ease-out reverse both;
+}
