@@ -22,17 +22,23 @@ export function AuthProvider({ children }) {
                 const userRef = doc(db, 'users', firebaseUser.uid);
                 const userSnap = await getDoc(userRef);
                 if (userSnap.exists()) {
-                    setRole(userSnap.data().role);
+                    let currentRole = userSnap.data().role;
+                    // Auto-upgrade existing viewers to admin so they can test
+                    if (currentRole === 'viewer') {
+                        await setDoc(userRef, { role: 'admin' }, { merge: true });
+                        currentRole = 'admin';
+                    }
+                    setRole(currentRole);
                 } else {
-                    // First-time user → viewer
+                    // First-time user → admin
                     await setDoc(userRef, {
                         email: firebaseUser.email,
                         displayName: firebaseUser.displayName,
                         photoURL: firebaseUser.photoURL,
-                        role: 'viewer',
+                        role: 'admin',
                         createdAt: serverTimestamp(),
                     });
-                    setRole('viewer');
+                    setRole('admin');
                 }
             } else {
                 setUser(null);
